@@ -10,6 +10,13 @@ class Pirg(object):
         self.token = token if token else os.getenv('PIRG_TOKEN')
         self.user = user if user else os.getenv('PIRG_USER')
 
+    def d(self, fn):
+        def wrapper(*args, **kwargs):
+            result = fn(*args, **kwargs)
+            self.push_it()
+            return result
+        return wrapper
+
     def push_it(self):
         data = {
             'message': self.message,
@@ -17,7 +24,8 @@ class Pirg(object):
             'user': self.user
         }
         resp = requests.post(self.url, data=data)
-        resp.raise_for_status()
+        if resp.status_code != 200:
+            print("Something went wrong pushing it real good")
 
     def __enter__(self):
         return self
